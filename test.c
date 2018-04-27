@@ -23,10 +23,8 @@ typedef struct Array
 	int size;
 }Array;
 
-struct Node* start = NULL;
-struct Node* end = NULL;
-struct Node* visited =NULL;
-struct Node* visitedEnd =NULL;
+//struct Node* start = NULL;
+//struct Node* end = NULL;
 
 void enqueue(char** puzzle, int depth)
 {
@@ -43,24 +41,6 @@ void enqueue(char** puzzle, int depth)
 	}
 	end->next = node;
 	end = node;
-
-}
-
-void addVisited(char** puzzle)
-{
-	//printf("enqueue---------------\n ");
-	Node* node = (Node*)malloc(sizeof(Node));
-	node->puzzle = puzzle;
-	node->depth = -1;
-	node->next = NULL;
-
-	if(visited == NULL && visitedEnd == NULL)
-	{
-		visited = visitedEnd = node;
-		return;
-	}
-	visitedEnd = node;
-
 
 }
 
@@ -115,7 +95,7 @@ char** createMatrix(int N, int M)
 
 void printMatrix(char** matriz, int N, int M)
 {
-	printf("printMatrix---------------\n ");
+	//printf("printMatrix---------------\n ");
 	printf("\nInicio Matriz\n\n");
 	int i, j;
 	for (i = 0; i < N; i++)
@@ -195,8 +175,8 @@ Position searchElementMatrix(char** puzzle,char c)
 		{
 			if(puzzle[i][j]==c)
 			{
-				pos.x=j;
-				pos.y=i;
+				pos.x=i;
+				pos.y=j;
 				return pos;
 			}
 		}
@@ -238,91 +218,62 @@ void freeMatrix(char** matrix)
 	free(matrix);
 }
 
-void printArray(Array* a)
+void printArray(Array a)
 {
 	int i,size;
-	size = a->size;
+	size = a.size;
 	for(i=0;i<size;i++)
 	{
-		printf("%d ",a->array[i]);
+		printf("%d ",a.array[i]);
 	}
 	printf("\n");
 }
 
-int isVisited(char** puzzle)
-{
-	printf("isVisited---------------\n ");
-	Node* n = visited;
-	while(n!=NULL)
-	{
-		if(compareMatrix(puzzle,n->puzzle)==1)
-		{
-			return 1;
-		}
-		n=n->next;
-	}
-	return 0;
-}
-
-Array* solution(char** puzzle)
+Array solution(char** puzzle)
 {
 	printf("solution---------------\n ");
-	
 	Position startPosition,swapPos; 
 	enqueue(puzzle,0);
+	int flag = 1;
 	Node* node;
 	int i;
 	char** finalAnswer=createFinalAnswer();
-	Array* depths =(Array*)malloc(sizeof(Array));
-	depths->array = NULL;
-	depths->size=0;
+	Array depths;
+	depths.array = NULL;
+	depths.size=0;
 	int size = 1;
-	printf("ok1");
-	int cont;
-	addVisited(puzzle);
-	char** puzzleAux=puzzle;
-	for(cont=0;cont<5;cont++)
+	while(flag==1)
 	{
-		startPosition = searchElementMatrix(puzzleAux,'x');
+		startPosition = searchElementMatrix(puzzle,'x');
 		node=dequeue();
+		printf("while\n");
 		for(i=0;i<4;i++)
 		{
-			printf("cont: %d for: %d\n",cont,i);
-			
+			printf("for\n");
 			if(startPosition.x + dx[i] < 3 && startPosition.x + dx[i] >= 0 && startPosition.y + dy[i] < 3 && startPosition.y + dy[i] >= 0)
 			{
 				swapPos.x=startPosition.x+dx[i];
 				swapPos.y=startPosition.y+dy[i];
-				puzzleAux = swap(node->puzzle,startPosition,swapPos);
-				printf("start x: %d y: %d\n",startPosition.x,startPosition.y);
-				if(isVisited(puzzleAux)==0)
+				char** puzzleAux = swap(node->puzzle,startPosition,swapPos);
+				enqueue(puzzleAux,(node->depth)+1);
+				printf("if\n");
+				if(compareMatrix(puzzleAux,finalAnswer))
 				{
-					addVisited(puzzleAux);
-					enqueue(puzzleAux,(node->depth)+1);
-					printf("COMPARE-----------------");
-					printMatrix(node->puzzle,3,3);
-					printMatrix(puzzleAux,3,3);
-					printf("if\n");
-					/*
-					if(compareMatrix(puzzleAux,finalAnswer))
-					{
-						depths->array=realloc(depths->array,sizeof(int)*size);
-						depths->array[0]=(node->depth)+1;
-						depths->size=depths->size+1;
-						size++;
-						printArray(depths);
-					}
-					else
-					{
-						freeMatrix(puzzleAux);
-					}*/
+					depths.array=realloc(depths.array,sizeof(int)*size);
+					depths.array[0]=(node->depth)+1;
+					depths.size=depths.size+1;
+					size++;
+					printArray(depths);
 				}
+				else
+				{
+					freeMatrix(puzzleAux);
+				}
+
 			}
 		}
-		
 	}
-	//return depths;
-	return NULL;
+	return depths;
 }
 
 int max(Array a)
@@ -342,7 +293,6 @@ int max(Array a)
 	return max;
 }
 
-
 int main()
 {
 	printf("wat?\n");
@@ -353,8 +303,8 @@ int main()
 	
 
 	printf("Ans: ");
-	Array* depths = solution(puzzle);
-	//printf("%d",max(depths));
+	Array depths = solution(puzzle);
+	printf("%d",max(depths));
 
 	return 0;
 }
