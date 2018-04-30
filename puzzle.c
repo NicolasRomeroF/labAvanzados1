@@ -59,6 +59,7 @@ void addVisited(char** puzzle)
 		visited = visitedEnd = node;
 		return;
 	}
+	visitedEnd->next = node;
 	visitedEnd = node;
 
 
@@ -195,8 +196,8 @@ Position searchElementMatrix(char** puzzle,char c)
 		{
 			if(puzzle[i][j]==c)
 			{
-				pos.x=j;
-				pos.y=i;
+				pos.x=i;
+				pos.y=j;
 				return pos;
 			}
 		}
@@ -251,7 +252,7 @@ void printArray(Array* a)
 
 int isVisited(char** puzzle)
 {
-	printf("isVisited---------------\n ");
+	//printf("isVisited---------------\n ");
 	Node* n = visited;
 	while(n!=NULL)
 	{
@@ -264,9 +265,66 @@ int isVisited(char** puzzle)
 	return 0;
 }
 
+int sizeQueue()
+{
+	Node* n = start;
+	int size=0;
+	while(n != NULL)
+	{
+		size++;
+		n=n->next;
+	}
+	return size;
+}
+
+void printVisited()
+{
+	//printf("VISITED-----------------------------------");
+	Node* n = visited;
+	while(n != NULL)
+	{
+		printMatrix(n->puzzle,3,3);
+		n=n->next;
+	}
+}
+int sizeVisited()
+{
+	//printf("VISITED-----------------------------------");
+	Node* n = visited;
+	int size = 0;
+	while(n != NULL)
+	{
+		size++;
+		n=n->next;
+	}
+	return size;
+}
+
+int compareVisited()
+{
+	Node* n = visited;
+	Node* next = n->next;
+	int cont = 0;
+	while(n != NULL)
+	{
+		while(next != NULL)
+		{
+			if(compareMatrix(n->puzzle,next->puzzle)==1)
+			{
+				return 1;
+			}
+			next = next->next;
+			cont++;
+		}
+		n=n->next;
+	}
+	printf("cont: %d\n",cont);
+	return 0;
+}
+
 Array* solution(char** puzzle)
 {
-	printf("solution---------------\n ");
+	//printf("solution---------------\n ");
 	
 	Position startPosition,swapPos; 
 	enqueue(puzzle,0);
@@ -277,63 +335,85 @@ Array* solution(char** puzzle)
 	depths->array = NULL;
 	depths->size=0;
 	int size = 1;
-	printf("ok1");
-	int cont;
+	//printf("ok1");
+	int cont=0;
 	addVisited(puzzle);
 	char** puzzleAux=puzzle;
-	for(cont=0;cont<5;cont++)
+	while(cont < 10000)
 	{
-		startPosition = searchElementMatrix(puzzleAux,'x');
 		node=dequeue();
+		startPosition = searchElementMatrix(node->puzzle,'x');
+		printf("cont: %d for: %d\n",cont,i);
+		printf("Queue size: %d\n",sizeQueue());
+		printf("Visited size: %d\n",sizeVisited());
+
 		for(i=0;i<4;i++)
 		{
-			printf("cont: %d for: %d\n",cont,i);
+			//printf("cont: %d for: %d\n",cont,i);
+			//printMatrix(node->puzzle,3,3);
+
 			
 			if(startPosition.x + dx[i] < 3 && startPosition.x + dx[i] >= 0 && startPosition.y + dy[i] < 3 && startPosition.y + dy[i] >= 0)
 			{
 				swapPos.x=startPosition.x+dx[i];
 				swapPos.y=startPosition.y+dy[i];
 				puzzleAux = swap(node->puzzle,startPosition,swapPos);
-				printf("start x: %d y: %d\n",startPosition.x,startPosition.y);
+				//printf("start x: %d y: %d\n",startPosition.x,startPosition.y);
 				if(isVisited(puzzleAux)==0)
 				{
 					addVisited(puzzleAux);
 					enqueue(puzzleAux,(node->depth)+1);
-					printf("COMPARE-----------------");
-					printMatrix(node->puzzle,3,3);
-					printMatrix(puzzleAux,3,3);
-					printf("if\n");
-					/*
+
+					//printf("cont: %d for: %d\n",cont,i);
+					//printVisited();
+
+					//printf("COMPARE-----------------\n");
+					//printMatrix(node->puzzle,3,3);
+					//printMatrix(puzzleAux,3,3);
+					//printf("if\n");
+					
 					if(compareMatrix(puzzleAux,finalAnswer))
-					{
+					{ 
+						printf("IF COMPARE\n");
 						depths->array=realloc(depths->array,sizeof(int)*size);
-						depths->array[0]=(node->depth)+1;
+						depths->array[size-1]=(node->depth)+1;
 						depths->size=depths->size+1;
 						size++;
-						printArray(depths);
+						
 					}
-					else
-					{
-						freeMatrix(puzzleAux);
-					}*/
+
+				}
+				else
+				{
+					//printf("VISITED\n");
+					freeMatrix(puzzleAux);
 				}
 			}
 		}
+		cont++;
+		//printf("Queue size: %d\n",sizeQueue());
 		
 	}
-	//return depths;
-	return NULL;
+			printf("Queue size: %d\n",sizeQueue());
+			printf("cont: %d\n",cont);
+
+	printf("OVER-- size: %d\n",size);
+	printf("compareVisited: %d\n",compareVisited());
+	printArray(depths);
+	printf("size array: %d\n",depths->size);
+	return depths;
 }
 
-int max(Array a)
+int max(Array* a)
 {
-	printf("max---------------\n ");
-	int size = a.size;
+	//printf("max---------------\n ");
+	int size = a->size;
+	//printf("sizeArray: %d\n",size);
 	int i,aux;
-	int max=a.array[0];
+	int max=a->array[0];
 	for(i=0;i<size-1;i++)
 	{
-		aux=a.array[i+1];
+		aux=a->array[i+1];
 		if(aux>max)
 		{
 			max=aux;
@@ -345,16 +425,18 @@ int max(Array a)
 
 int main()
 {
-	printf("wat?\n");
-	FILE* entrada = fopen("entrada.in","r");
+	//printf("wat?\n");
+	FILE* entrada = fopen("Entrada.in","r");
 	char** puzzle = readFile(entrada);
+	fclose(entrada);
 	printf("Archivo leido\n");
 	printMatrix(puzzle,3,3);
-	
-
-	printf("Ans: ");
 	Array* depths = solution(puzzle);
-	//printf("%d",max(depths));
+
+	printf("Se requieren %d movimientos\n",max(depths));
+	FILE* salida = fopen("Salida.out","w");
+	fprintf(salida,"Se requieren %d movimientos\n",max(depths));
+	fclose(salida);
 
 	return 0;
 }
