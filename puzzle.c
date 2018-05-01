@@ -85,6 +85,22 @@ Node* dequeue()
 	return node;
 }
 
+void freeMatrix(char** matrix)
+{
+	int i;
+	for(i=0;i<3;i++)
+	{
+		free(matrix[i]);
+	}
+	free(matrix);
+}
+
+void freeNode(Node* n)
+{
+	//freeMatrix(n->puzzle);
+	free(n);
+}
+
 char** createMatrix(int N, int M)
 {
 	//printf("createMatrix---------------\n ");
@@ -229,16 +245,6 @@ char** swap(char** puzzle,Position pos1, Position pos2)
 	return new;
 }
 
-void freeMatrix(char** matrix)
-{
-	int i;
-	for(i=0;i<3;i++)
-	{
-		free(matrix[i]);
-	}
-	free(matrix);
-}
-
 void printArray(Array* a)
 {
 	int i,size;
@@ -339,8 +345,10 @@ Array* solution(char** puzzle)
 	int cont=0;
 	addVisited(puzzle);
 	char** puzzleAux=puzzle;
-	while(cont < 10000)
+	while(start != NULL)
 	{
+		//printf("Queue size bef: %d\n",sizeQueue());
+
 		node=dequeue();
 		startPosition = searchElementMatrix(node->puzzle,'x');
 		printf("cont: %d for: %d\n",cont,i);
@@ -374,7 +382,7 @@ Array* solution(char** puzzle)
 					
 					if(compareMatrix(puzzleAux,finalAnswer))
 					{ 
-						printf("IF COMPARE\n");
+						//printf("IF COMPARE\n");
 						depths->array=realloc(depths->array,sizeof(int)*size);
 						depths->array[size-1]=(node->depth)+1;
 						depths->size=depths->size+1;
@@ -391,11 +399,13 @@ Array* solution(char** puzzle)
 			}
 		}
 		cont++;
+		//printf("antes free\n");
+		freeNode(node);
 		//printf("Queue size: %d\n",sizeQueue());
 		
 	}
-			printf("Queue size: %d\n",sizeQueue());
-			printf("cont: %d\n",cont);
+	printf("Queue size: %d\n",sizeQueue());
+	printf("cont: %d\n",cont);
 
 	printf("OVER-- size: %d\n",size);
 	printf("compareVisited: %d\n",compareVisited());
