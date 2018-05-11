@@ -324,9 +324,17 @@ Array* solution(char** puzzle)
 	//int cont=0;
 	addVisited(puzzle);
 	char** puzzleAux=puzzle;
+	if(compareMatrix(puzzle,finalAnswer)==1)
+	{
+		depths->array=realloc(depths->array,sizeof(int)*size);
+		depths->array[size-1]=0;
+		depths->size=depths->size+1;
+		return depths;
+	}
+
+
 	while(start != NULL)
 	{
-
 		node=dequeue();
 		startPosition = searchElementMatrix(node->puzzle,'x');
 
@@ -341,17 +349,18 @@ Array* solution(char** puzzle)
 				puzzleAux = swap(node->puzzle,startPosition,swapPos);
 				if(isVisited(puzzleAux)==0)
 				{
-					addVisited(puzzleAux);
-					enqueue(puzzleAux,(node->depth)+1);
+					if(compareMatrix(puzzleAux,finalAnswer)==0)
+					{
+						addVisited(puzzleAux);
+						enqueue(puzzleAux,(node->depth)+1);
 
-					
-					if(compareMatrix(puzzleAux,finalAnswer))
+					}		
+					else
 					{ 
 						depths->array=realloc(depths->array,sizeof(int)*size);
 						depths->array[size-1]=(node->depth)+1;
 						depths->size=depths->size+1;
 						size++;
-						
 					}
 
 				}
@@ -399,7 +408,6 @@ void inicio()
 	printf("...\n");
 	printf("...\n");
 	Array* depths = solution(puzzle);
-	printArray(depths);
 	int movimientos = min(depths);
 	printf("Se requieren %d movimientos\n", movimientos);
 	FILE* salida = fopen("Salida.out","w");

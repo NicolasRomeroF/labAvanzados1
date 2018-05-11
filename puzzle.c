@@ -342,7 +342,7 @@ Array* solution(char** puzzle)
 	depths->size=0;
 	int size = 1;
 	//printf("ok1");
-	int cont=0;
+	//int cont=0;
 	addVisited(puzzle);
 	char** puzzleAux=puzzle;
 	while(start != NULL)
@@ -398,7 +398,7 @@ Array* solution(char** puzzle)
 				}
 			}
 		}
-		cont++;
+		//cont++;
 		//printf("antes free\n");
 		freeNode(node);
 		//printf("Queue size: %d\n",sizeQueue());
